@@ -1,9 +1,43 @@
-# 
-# docker-compose.yml — определяет сервисы для разработки и тестирования.
+services:
+  PostgreSQL:
+    image: postgres:16.0
+    container_name: PostgreSQL
+    user: root
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "bcsm_db"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bcsm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - postgres
 
-Что нужно сделать:
-  - Настроить сервисы для:
-      - PostgreSQL (или MySQL) с начальной базой.
-      - Приложения Spring Boot (если нужно).
-  - Открыть нужные порты (например, 5432, 8080).
-  - Настроить volume для хранения данных БД.
+  bcsm-app:
+    image: bcsm-app
+    user: root
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9009:9009"
+    depends_on:
+      - PostgreSQL
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  pgdata:

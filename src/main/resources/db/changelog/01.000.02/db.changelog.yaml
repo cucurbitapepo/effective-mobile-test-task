@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: data.sql
+      relativeToChangelogFile: true
+  - changeSet:
+      id: 01.000.02
+      author: cucurbita
+      logicalFilePath: 01.000.02/db.changelog.yaml
+      changes:
+        - tagDatabase:
+            tag: 01.000.02
